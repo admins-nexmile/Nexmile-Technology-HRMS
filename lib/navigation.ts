@@ -62,6 +62,12 @@ export const navigation: NavSection[] = [
         href: "/admin/invitations",
         show: can(PERMISSIONS.invitationsManage),
       },
+      {
+        label: "Audit log",
+        icon: "list",
+        href: "/admin/audit",
+        show: (c) => hasRole(c.roleKeys, ROLES.superAdmin),
+      },
     ],
   },
 ];

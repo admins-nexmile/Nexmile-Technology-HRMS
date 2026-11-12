@@ -82,3 +82,7 @@ They are not real employee records or valid payroll calculations.
 
 Do not skip security design to accelerate development.
 Do not describe synthetic payroll calculations as production-ready.
+
+## Operations
+- See docs/RUNBOOK.md for setup, migration order, invitations, Google test users, roles, backups and rollback.
+
