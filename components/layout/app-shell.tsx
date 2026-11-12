@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
-import type { HeaderUser } from "@/lib/types/hrms";
+import type { HeaderUser, NavContext } from "@/lib/types/hrms";
 import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
 
 export function AppShell({
   user,
-  permissions,
+  nav,
   children,
 }: {
   user: HeaderUser;
-  /** Used only to hide navigation; pages enforce permissions server-side. */
-  permissions: readonly string[];
+  /** Used only to hide navigation; pages enforce access server-side. */
+  nav: NavContext;
   children: ReactNode;
 }) {
   return (
@@ -23,11 +23,11 @@ export function AppShell({
       </a>
 
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block">
-        <SidebarContent permissions={permissions} />
+        <SidebarContent nav={nav} />
       </aside>
 
       <div className="flex min-h-dvh flex-col lg:pl-64">
-        <Topbar user={user} permissions={permissions} />
+        <Topbar user={user} nav={nav} />
         <main
           id="main-content"
           tabIndex={-1}

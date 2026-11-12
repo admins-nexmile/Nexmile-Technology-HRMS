@@ -1,36 +1,37 @@
-import { PERMISSIONS } from "@/lib/auth/permissions";
-import type { NavSection } from "@/lib/types/hrms";
+import { PERMISSIONS, ROLES, hasPermission, hasRole } from "@/lib/auth/permissions";
+import type { NavContext, NavSection } from "@/lib/types/hrms";
 
 /**
- * Sidebar navigation. Only routes that exist have an href; everything
- * else is shown as "coming soon" and is not a link. Items with
- * `requiredPermission` are hidden from users without it (the pages
- * themselves also check the permission on the server).
+ * Sidebar navigation, built from the signed-in user's roles and
+ * permissions. Items the user cannot use are not rendered at all. This is
+ * presentation only: every page and server action re-checks access on the
+ * server, and the database enforces it again (RLS + functions).
  */
+const isEmployee = (c: NavContext) => c.hasEmployee;
+const can = (permission: string) => (c: NavContext) => hasPermission(c.permissions, permission);
+
 export const navigation: NavSection[] = [
   {
     title: "Overview",
-    items: [
-      { label: "Dashboard", icon: "dashboard", href: "/", status: "available" },
-    ],
+    items: [{ label: "Dashboard", icon: "dashboard", href: "/", show: () => true }],
   },
   {
-    title: "People",
+    title: "My workspace",
     items: [
-      { label: "Employees", icon: "users", status: "coming-soon" },
-      { label: "Attendance", icon: "clock", status: "coming-soon" },
-      { label: "Leave", icon: "calendar", status: "coming-soon" },
-      { label: "Holidays", icon: "sun", status: "coming-soon" },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [
-      { label: "Payroll", icon: "wallet", status: "coming-soon" },
-      { label: "Documents", icon: "file", status: "coming-soon" },
-      { label: "Announcements", icon: "megaphone", status: "coming-soon" },
-      { label: "Training", icon: "graduation", status: "coming-soon" },
-      { label: "Reports", icon: "chart", status: "coming-soon" },
+      { label: "My profile", icon: "user", href: "/profile", show: isEmployee },
+      { label: "Attendance", icon: "clock", href: "/attendance", show: isEmployee },
+      {
+        label: "Leave",
+        icon: "calendar",
+        href: "/leave",
+        show: (c) =>
+          c.hasEmployee ||
+          hasRole(c.roleKeys, ROLES.manager) ||
+          hasPermission(c.permissions, PERMISSIONS.employeesManage),
+      },
+      { label: "Holidays", icon: "sun", href: "/holidays", show: () => true },
+      { label: "Announcements", icon: "megaphone", href: "/announcements", show: () => true },
+      { label: "Training", icon: "graduation", href: "/training", show: isEmployee },
     ],
   },
   {
@@ -40,10 +41,15 @@ export const navigation: NavSection[] = [
         label: "Invitations",
         icon: "userPlus",
         href: "/admin/invitations",
-        status: "available",
-        requiredPermission: PERMISSIONS.invitationsManage,
+        show: can(PERMISSIONS.invitationsManage),
       },
-      { label: "Settings", icon: "settings", status: "coming-soon" },
     ],
   },
 ];
+
+/** Drops items the user may not use, then any empty sections. */
+export function visibleNavigation(context: NavContext): NavSection[] {
+  return navigation
+    .map((section) => ({ ...section, items: section.items.filter((item) => item.show(context)) }))
+    .filter((section) => section.items.length > 0);
+}

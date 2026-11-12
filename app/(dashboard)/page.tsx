@@ -1,115 +1,199 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { AnnouncementsList } from "@/components/dashboard/announcements-list";
-import { AttendanceOverview } from "@/components/dashboard/attendance-overview";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { QuickActions } from "@/components/dashboard/quick-actions";
 import { StatsGrid } from "@/components/dashboard/stats-grid";
+import { TeamToday } from "@/components/dashboard/team-today";
 import { UpcomingHolidays } from "@/components/dashboard/upcoming-holidays";
+import { LeaveBalances } from "@/components/leave/leave-balances";
+import { MyLeaveTable } from "@/components/leave/my-leave-table";
+import { TodayAttendanceCard } from "@/components/self-service/today-attendance-card";
+import { EnrollmentList } from "@/components/training/enrollment-list";
+import { Card, CardHeader } from "@/components/ui/card";
+import { PageSkeleton } from "@/components/ui/page-title";
+import { canApproveLeave, requireActiveUser } from "@/lib/auth/guards";
+import { PERMISSIONS, ROLES, hasPermission, hasRole } from "@/lib/auth/permissions";
+import type { ActiveUser } from "@/lib/auth/session";
+import { getCompanyTotals } from "@/lib/data/company";
 import {
-  DEMO_REFERENCE_DATE,
-  announcements,
-  attendanceLastSevenDays,
-  attendanceToday,
-  newJoinersThisMonth,
-  pendingLeaveRaisedToday,
-  pendingLeaveRequests,
-  quickActions,
-  totalEmployees,
-  upcomingHolidays,
-} from "@/lib/demo-data/dashboard";
-import { getAccessState } from "@/lib/auth/session";
+  getHolidays,
+  getMyAnnouncements,
+  getMyAttendanceToday,
+  getMyEnrollments,
+  getMyLeaveBalances,
+  getMyLeaveRequests,
+} from "@/lib/data/self-service";
+import { getMyTeam, getPendingApprovals } from "@/lib/data/team";
 import type { StatSummary } from "@/lib/types/hrms";
-import { daysBetween, formatDate, formatNumber, formatPercent } from "@/lib/utils/format";
+import { addDays, todayIst } from "@/lib/utils/dates";
+import { formatLongDate, formatNumber } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Dashboard",
 };
 
-// All values below come from FICTIONAL demonstration data.
-function buildStats(): StatSummary[] {
-  const present = attendanceToday.inOffice + attendanceToday.remote;
-  const nextHoliday = upcomingHolidays[0];
-  const holidaysNext90 = upcomingHolidays.filter(
-    (h) => daysBetween(DEMO_REFERENCE_DATE, h.date) <= 90,
-  ).length;
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<PageSkeleton label="Loading dashboard…" blocks={4} />}>
+      <Dashboard />
+    </Suspense>
+  );
+}
 
-  return [
+/**
+ * Role-based dashboard. Every widget reads through the user's own session,
+ * so RLS limits each query to what that user may see:
+ *   - employee view (own data) for any account linked to an employee
+ *   - "My team" for the manager role
+ *   - company totals for employees.manage (HR Admin, Super Admin)
+ */
+async function Dashboard() {
+  const user = await requireActiveUser();
+  const today = todayIst();
+  const roleKeys = user.roles.map((r) => r.key);
+  const isManager = hasRole(roleKeys, ROLES.manager) && user.employeeId !== null;
+  const showCompany = hasPermission(user.permissions, PERMISSIONS.employeesManage);
+  const firstName = user.name.split(" ")[0] || user.name;
+
+  const [holidays, announcements] = await Promise.all([
+    getHolidays(today, addDays(today, 120)),
+    getMyAnnouncements(5),
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-sm font-medium text-ink-subtle">
+          <time dateTime={today}>{formatLongDate(today)}</time>
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+          Welcome back, {firstName}
+        </h1>
+      </div>
+
+      {showCompany ? <CompanySection today={today} /> : null}
+
+      {user.employeeId ? (
+        <EmployeeSection user={user} employeeId={user.employeeId} today={today} />
+      ) : null}
+
+      {isManager && user.employeeId ? (
+        <ManagerSection user={user} employeeId={user.employeeId} today={today} />
+      ) : null}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <UpcomingHolidays holidays={holidays.slice(0, 5)} today={today} />
+        <AnnouncementsList announcements={announcements} />
+      </div>
+    </div>
+  );
+}
+
+async function CompanySection({ today }: { today: string }) {
+  const totals = await getCompanyTotals(today);
+  const stats: StatSummary[] = [
     {
       id: "employees",
-      label: "Total employees",
-      value: formatNumber(totalEmployees),
+      label: "Active employees",
+      value: formatNumber(totals.activeEmployees),
       icon: "users",
       tone: "brand",
-      trend: { direction: "up", text: `+${newJoinersThisMonth}` },
-      detail: "joined this month",
+      detail: `${totals.joinedThisMonth} joined this month`,
     },
     {
       id: "present",
       label: "Present today",
-      value: formatNumber(present),
+      value: formatNumber(totals.presentToday),
       icon: "check",
       tone: "success",
-      detail: `${formatPercent((present / totalEmployees) * 100)} of workforce`,
+      detail: `of ${formatNumber(totals.activeEmployees)} active employees`,
     },
     {
-      id: "leave",
-      label: "Pending leave requests",
-      value: formatNumber(pendingLeaveRequests),
+      id: "on-leave",
+      label: "On leave today",
+      value: formatNumber(totals.onLeaveToday),
       icon: "calendar",
-      tone: "warning",
-      detail: `${pendingLeaveRaisedToday} raised today`,
+      tone: "info",
+      detail: "approved leave covering today",
     },
     {
-      id: "holidays",
-      label: "Upcoming holidays",
-      value: formatNumber(holidaysNext90),
-      icon: "sun",
-      tone: "info",
-      detail: nextHoliday
-        ? `in next 90 days · next: ${nextHoliday.name}, ${formatDate(nextHoliday.date, { day: "numeric", month: "short" })}`
-        : "in next 90 days",
+      id: "pending",
+      label: "Pending leave requests",
+      value: formatNumber(totals.pendingLeave),
+      icon: "clock",
+      tone: "warning",
+      detail: "awaiting a decision",
     },
   ];
+  return <StatsGrid stats={stats} />;
 }
 
-/** Greets the signed-in user; reads the session, so it streams in. */
-async function SignedInPageHeader() {
-  const access = await getAccessState();
-  const name = access.status === "active" ? access.name : "";
-  const firstName = name.split(" ")[0] || name || "there";
-  return <PageHeader userFirstName={firstName} referenceDate={DEMO_REFERENCE_DATE} />;
-}
+async function EmployeeSection({
+  employeeId,
+  today,
+}: {
+  user: ActiveUser;
+  employeeId: string;
+  today: string;
+}) {
+  const year = Number(today.slice(0, 4));
+  const [attendance, balances, requests, enrollments] = await Promise.all([
+    getMyAttendanceToday(employeeId, today),
+    getMyLeaveBalances(year),
+    getMyLeaveRequests(employeeId, 5),
+    getMyEnrollments(employeeId),
+  ]);
+  const openTraining = enrollments.filter((e) => e.status === "ASSIGNED" || e.status === "IN_PROGRESS");
 
-export default function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <Suspense
-        fallback={<PageHeader userFirstName="there" referenceDate={DEMO_REFERENCE_DATE} />}
-      >
-        <SignedInPageHeader />
-      </Suspense>
-
-      <StatsGrid stats={buildStats()} />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <AttendanceOverview
-            today={attendanceToday}
-            lastSevenDays={attendanceLastSevenDays}
-            referenceDate={DEMO_REFERENCE_DATE}
-          />
-        </div>
-        <UpcomingHolidays
-          holidays={upcomingHolidays}
-          referenceDate={DEMO_REFERENCE_DATE}
-        />
-      </div>
-
+    <>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <AnnouncementsList announcements={announcements} />
-        <QuickActions actions={quickActions} />
+        <TodayAttendanceCard today={today} record={attendance} />
+        <LeaveBalances balances={balances} year={year} compact />
       </div>
-    </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Card aria-labelledby="my-leave-heading">
+          <CardHeader
+            titleId="my-leave-heading"
+            title="My leave requests"
+            action={
+              <Link href="/leave" className="text-sm font-medium text-brand-700 hover:underline">
+                Apply or view all
+              </Link>
+            }
+          />
+          <MyLeaveTable requests={requests} allowCancel={false} />
+        </Card>
+        <Card aria-labelledby="my-training-heading">
+          <CardHeader
+            titleId="my-training-heading"
+            title="My training"
+            description={`${openTraining.length} open`}
+            action={
+              <Link href="/training" className="text-sm font-medium text-brand-700 hover:underline">
+                View all
+              </Link>
+            }
+          />
+          <EnrollmentList enrollments={openTraining.slice(0, 5)} showActions={false} />
+        </Card>
+      </div>
+    </>
   );
+}
+
+async function ManagerSection({
+  user,
+  employeeId,
+  today,
+}: {
+  user: ActiveUser;
+  employeeId: string;
+  today: string;
+}) {
+  const [team, approvals] = await Promise.all([
+    getMyTeam(employeeId, today),
+    canApproveLeave(user) ? getPendingApprovals(employeeId, false) : Promise.resolve([]),
+  ]);
+  return <TeamToday team={team} pendingApprovals={approvals.length} />;
 }

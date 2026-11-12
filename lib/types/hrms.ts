@@ -3,14 +3,20 @@ import type { IconName } from "@/components/ui/icons";
 /** ISO calendar date, YYYY-MM-DD. */
 export type IsoDate = string;
 
+/** What the navigation needs to know about the signed-in user. */
+export type NavContext = {
+  permissions: readonly string[];
+  roleKeys: readonly string[];
+  /** Account is linked to an employee record (self-service available). */
+  hasEmployee: boolean;
+};
+
 export type NavItem = {
   label: string;
   icon: IconName;
-  /** Only set for routes that actually exist. */
-  href?: string;
-  status: "available" | "coming-soon";
-  /** Hidden unless the signed-in user holds this permission. */
-  requiredPermission?: string;
+  href: string;
+  /** Rendered only when this returns true for the signed-in user. */
+  show: (context: NavContext) => boolean;
 };
 
 export type NavSection = {
@@ -26,60 +32,8 @@ export type StatSummary = {
   value: string;
   icon: IconName;
   tone: StatTone;
-  /** Short supporting line, e.g. "87.5% of workforce". */
+  /** Short supporting line, e.g. "of 12 active employees". */
   detail: string;
-  trend?: {
-    direction: "up" | "down";
-    text: string;
-  };
-};
-
-export type AttendanceBreakdown = {
-  totalEmployees: number;
-  inOffice: number;
-  remote: number;
-  onLeave: number;
-  absent: number;
-};
-
-export type AttendanceDay = {
-  date: IsoDate;
-  /** Percentage of employees present (office + remote). */
-  presentRate: number;
-};
-
-export type AnnouncementCategory = "Policy" | "Event" | "IT" | "General";
-
-export type Announcement = {
-  id: string;
-  title: string;
-  excerpt: string;
-  category: AnnouncementCategory;
-  author: string;
-  publishedOn: IsoDate;
-};
-
-export type Holiday = {
-  id: string;
-  name: string;
-  date: IsoDate;
-  kind: "National" | "Festival" | "Company";
-};
-
-export type QuickAction = {
-  id: string;
-  label: string;
-  description: string;
-  icon: IconName;
-  /** Why the action is not available yet. All actions are disabled for now. */
-  unavailableReason: string;
-};
-
-export type DemoNotification = {
-  id: string;
-  title: string;
-  time: string;
-  unread: boolean;
 };
 
 /** Signed-in user as shown in the top bar (name, email, role label). */
@@ -88,5 +42,3 @@ export type HeaderUser = {
   role: string;
   email: string;
 };
-
-export type DemoUser = HeaderUser;

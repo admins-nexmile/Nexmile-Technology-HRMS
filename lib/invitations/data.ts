@@ -1,5 +1,5 @@
 import "server-only";
-import type { PostgrestError } from "@supabase/supabase-js";
+import { GENERIC_ERROR, asRows, toUserMessage } from "@/lib/data/errors";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -35,29 +35,7 @@ export type InvitableEmployee = {
 
 export type AcceptResult = "accepted" | "none" | "expired";
 
-const GENERIC_ERROR = "Something went wrong. Please try again or contact an administrator.";
-
-/**
- * Turns a database error into a message safe to show. Messages raised by
- * our own functions (P0001 / 42501 with a sentence) are shown; anything
- * else (constraint names, internal errors) becomes a generic message.
- */
-export function toUserMessage(error: Pick<PostgrestError, "code" | "message"> | null): string {
-  if (!error) return GENERIC_ERROR;
-  const ownMessage =
-    (error.code === "P0001" || error.code === "42501") &&
-    !/^permission denied/i.test(error.message);
-  return ownMessage ? error.message : GENERIC_ERROR;
-}
-
-/**
- * Set-returning RPCs come back as arrays. Generated database types are not
- * in use yet, so the row shape is asserted here (it mirrors the SQL
- * RETURNS TABLE definitions in migration 2.3).
- */
-function asRows<T>(data: unknown): T[] {
-  return Array.isArray(data) ? (data as T[]) : [];
-}
+export { toUserMessage };
 
 export async function listInvitations(): Promise<InvitationRow[]> {
   const supabase = await createClient();

@@ -37,12 +37,3 @@ export function Badge({ tone = "neutral", children, className }: BadgeProps) {
     </span>
   );
 }
-
-/** Standard marker for fictional demonstration content. */
-export function DemoDataBadge({ className }: { className?: string }) {
-  return (
-    <Badge tone="warning" className={className}>
-      Fictional demo data
-    </Badge>
-  );
-}
