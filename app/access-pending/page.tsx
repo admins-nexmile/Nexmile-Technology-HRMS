@@ -25,6 +25,7 @@ async function PendingDetails() {
   const access = await getAccessState();
   if (access.status === "anonymous") redirect("/login");
   if (access.status === "rejected") redirect(loginErrorPath(access.reason));
+  if (access.status === "active") redirect("/");
 
   return (
     <>
@@ -34,7 +35,8 @@ async function PendingDetails() {
       </p>
       <p className="mt-3 text-sm text-ink-subtle">
         Your account has not been granted access to the HRMS yet. An
-        administrator will assign your role. Please check back later.
+        administrator will activate your account and assign your role.
+        Please check back later.
       </p>
       <form action={signOut} className="mt-6">
         <SubmitButton className="w-full" pendingLabel="Signing out…">

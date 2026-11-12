@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
+import type { HeaderUser } from "@/lib/types/hrms";
 import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ user, children }: { user: HeaderUser; children: ReactNode }) {
   return (
     <div className="min-h-dvh">
       <a
@@ -17,7 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-h-dvh flex-col lg:pl-64">
-        <Topbar />
+        <Topbar user={user} />
         <main
           id="main-content"
           tabIndex={-1}

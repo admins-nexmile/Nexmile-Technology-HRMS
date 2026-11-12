@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AnnouncementsList } from "@/components/dashboard/announcements-list";
 import { AttendanceOverview } from "@/components/dashboard/attendance-overview";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -10,7 +11,6 @@ import {
   announcements,
   attendanceLastSevenDays,
   attendanceToday,
-  demoUser,
   newJoinersThisMonth,
   pendingLeaveRaisedToday,
   pendingLeaveRequests,
@@ -18,6 +18,7 @@ import {
   totalEmployees,
   upcomingHolidays,
 } from "@/lib/demo-data/dashboard";
+import { getAccessState } from "@/lib/auth/session";
 import type { StatSummary } from "@/lib/types/hrms";
 import { daysBetween, formatDate, formatNumber, formatPercent } from "@/lib/utils/format";
 
@@ -72,12 +73,22 @@ function buildStats(): StatSummary[] {
   ];
 }
 
-export default function DashboardPage() {
-  const firstName = demoUser.name.split(" ")[0] ?? demoUser.name;
+/** Greets the signed-in user; reads the session, so it streams in. */
+async function SignedInPageHeader() {
+  const access = await getAccessState();
+  const name = access.status === "active" ? access.name : "";
+  const firstName = name.split(" ")[0] || name || "there";
+  return <PageHeader userFirstName={firstName} referenceDate={DEMO_REFERENCE_DATE} />;
+}
 
+export default function DashboardPage() {
   return (
     <div className="space-y-6">
-      <PageHeader userFirstName={firstName} referenceDate={DEMO_REFERENCE_DATE} />
+      <Suspense
+        fallback={<PageHeader userFirstName="there" referenceDate={DEMO_REFERENCE_DATE} />}
+      >
+        <SignedInPageHeader />
+      </Suspense>
 
       <StatsGrid stats={buildStats()} />
 

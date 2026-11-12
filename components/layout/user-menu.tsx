@@ -1,23 +1,23 @@
+import { signOut } from "@/app/auth/actions";
 import { Avatar } from "@/components/ui/avatar";
-import { DemoDataBadge } from "@/components/ui/badge";
 import { Dropdown } from "@/components/ui/dropdown";
 import { Icon, type IconName } from "@/components/ui/icons";
-import type { DemoUser } from "@/lib/types/hrms";
+import type { HeaderUser } from "@/lib/types/hrms";
 
 const plannedItems: { label: string; icon: IconName }[] = [
   { label: "My profile", icon: "user" },
   { label: "Account settings", icon: "settings" },
-  { label: "Sign out", icon: "logout" },
 ];
 
 /**
- * Profile menu for a fictional demo user. Authentication does not exist
- * yet, so every account action is shown as unavailable.
+ * Profile menu for the signed-in user. Name, email and role come from the
+ * server-verified session (see getAccessState). Profile and settings
+ * pages do not exist yet and are shown as unavailable.
  */
-export function UserMenu({ user }: { user: DemoUser }) {
+export function UserMenu({ user }: { user: HeaderUser }) {
   return (
     <Dropdown
-      label={`Account menu for ${user.name} (demo user)`}
+      label={`Account menu for ${user.name}`}
       triggerClassName="gap-2 py-1 pl-1 pr-2"
       trigger={
         <>
@@ -38,7 +38,7 @@ export function UserMenu({ user }: { user: DemoUser }) {
       <div className="border-b border-line px-4 py-3">
         <p className="text-sm font-semibold text-ink">{user.name}</p>
         <p className="truncate text-xs text-ink-subtle">{user.email}</p>
-        <DemoDataBadge className="mt-2" />
+        <p className="mt-1 text-xs text-ink-muted">{user.role}</p>
       </div>
       <ul className="py-1">
         {plannedItems.map((item) => (
@@ -55,9 +55,20 @@ export function UserMenu({ user }: { user: DemoUser }) {
             </span>
           </li>
         ))}
+        <li>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-ink hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+            >
+              <Icon name="logout" className="size-4" />
+              Sign out
+            </button>
+          </form>
+        </li>
       </ul>
       <p className="border-t border-line px-4 py-2.5 text-xs text-ink-subtle">
-        Sign-in and account management are not available yet.
+        Profile and account settings are coming soon.
       </p>
     </Dropdown>
   );

@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
     return fail(policy.reason);
   }
 
-  // Roles arrive in a later slice; approved accounts wait here for now.
-  return NextResponse.redirect(new URL("/access-pending", request.url));
+  // The dashboard gate sends users without an active profile and role
+  // on to /access-pending.
+  return NextResponse.redirect(new URL("/", request.url));
 }

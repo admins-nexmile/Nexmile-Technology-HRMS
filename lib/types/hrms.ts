@@ -80,8 +80,11 @@ export type DemoNotification = {
   unread: boolean;
 };
 
-export type DemoUser = {
+/** Signed-in user as shown in the top bar (name, email, role label). */
+export type HeaderUser = {
   name: string;
   role: string;
   email: string;
 };
+
+export type DemoUser = HeaderUser;

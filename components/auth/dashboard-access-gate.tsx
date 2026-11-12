@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { AppShell } from "@/components/layout/app-shell";
 import { loginErrorPath } from "@/lib/auth/errors";
-import { getAccessState } from "@/lib/auth/session";
+import { getAccessState, roleLabel } from "@/lib/auth/session";
 
 /**
  * Server-side guard for every dashboard route (defence in depth behind
  * proxy.ts). Must be rendered inside a <Suspense> boundary.
  *
- * Until roles exist, no account may see the dashboard: signed-in users
- * are sent to /access-pending.
+ * Only users with an active profile and at least one role get the
+ * dashboard; everyone else is redirected before anything renders.
  */
 export async function DashboardAccessGate({ children }: { children: ReactNode }) {
   const access = await getAccessState();
@@ -22,6 +23,11 @@ export async function DashboardAccessGate({ children }: { children: ReactNode })
       redirect("/access-pending");
   }
 
-  // Unreachable until an "active" status is introduced with roles.
-  return children;
+  return (
+    <AppShell
+      user={{ name: access.name, email: access.email, role: roleLabel(access) }}
+    >
+      {children}
+    </AppShell>
+  );
 }

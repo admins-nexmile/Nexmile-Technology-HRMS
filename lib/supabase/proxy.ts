@@ -67,6 +67,8 @@ export async function updateSession(request: NextRequest) {
 
   if (!claims) return redirectTo("/login");
 
-  // Roles are not implemented yet: every signed-in user waits for access.
-  return redirectTo("/access-pending");
+  // Signed in: the server-side DashboardAccessGate decides between the
+  // dashboard (active profile + role) and /access-pending, using the
+  // database rather than anything in the token.
+  return response;
 }

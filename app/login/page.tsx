@@ -31,6 +31,7 @@ async function LoginForm({
   searchParams: PageProps<"/login">["searchParams"];
 }) {
   const access = await getAccessState();
+  if (access.status === "active") redirect("/");
   if (access.status === "pending") redirect("/access-pending");
 
   const params = await searchParams;
