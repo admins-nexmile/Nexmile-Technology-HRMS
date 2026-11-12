@@ -32,7 +32,13 @@ export const navigation: NavSection[] = [
       { label: "Holidays", icon: "sun", href: "/holidays", show: () => true },
       { label: "Announcements", icon: "megaphone", href: "/announcements", show: () => true },
       { label: "Training", icon: "graduation", href: "/training", show: isEmployee },
+      { label: "My payslips", icon: "wallet", href: "/payslips", show: isEmployee },
+      { label: "My documents", icon: "file", href: "/documents", show: isEmployee },
     ],
+  },
+  {
+    title: "Payroll",
+    items: [{ label: "Payroll runs", icon: "wallet", href: "/payroll", show: can(PERMISSIONS.payrollRead) }],
   },
   {
     title: "HR administration",
@@ -43,6 +49,7 @@ export const navigation: NavSection[] = [
       { label: "Manage holidays", icon: "sun", href: "/admin/holidays", show: can(PERMISSIONS.employeesManage) },
       { label: "Manage announcements", icon: "megaphone", href: "/admin/announcements", show: can(PERMISSIONS.employeesManage) },
       { label: "Manage training", icon: "graduation", href: "/admin/training", show: can(PERMISSIONS.employeesManage) },
+      { label: "Manage documents", icon: "file", href: "/admin/documents", show: can(PERMISSIONS.employeesManage) },
     ],
   },
   {

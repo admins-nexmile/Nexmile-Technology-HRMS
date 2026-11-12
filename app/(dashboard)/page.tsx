@@ -23,10 +23,11 @@ import {
   getMyLeaveBalances,
   getMyLeaveRequests,
 } from "@/lib/data/self-service";
+import { listMyPayslips } from "@/lib/data/payroll";
 import { getMyTeam, getPendingApprovals } from "@/lib/data/team";
 import type { StatSummary } from "@/lib/types/hrms";
 import { addDays, todayIst } from "@/lib/utils/dates";
-import { formatLongDate, formatNumber } from "@/lib/utils/format";
+import { formatInr, formatLongDate, formatNumber } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -137,19 +138,50 @@ async function EmployeeSection({
   today: string;
 }) {
   const year = Number(today.slice(0, 4));
-  const [attendance, balances, requests, enrollments] = await Promise.all([
+  const [attendance, balances, requests, enrollments, payslips] = await Promise.all([
     getMyAttendanceToday(employeeId, today),
     getMyLeaveBalances(year),
     getMyLeaveRequests(employeeId, 5),
     getMyEnrollments(employeeId),
+    listMyPayslips(),
   ]);
   const openTraining = enrollments.filter((e) => e.status === "ASSIGNED" || e.status === "IN_PROGRESS");
+  const latestPayslip = payslips[0] ?? null;
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <TodayAttendanceCard today={today} record={attendance} />
         <LeaveBalances balances={balances} year={year} compact />
+        <Card aria-labelledby="payslip-heading" className="h-full">
+          <CardHeader
+            titleId="payslip-heading"
+            title="Latest payslip"
+            action={
+              <Link href="/payslips" className="text-sm font-medium text-brand-700 hover:underline">
+                All payslips
+              </Link>
+            }
+          />
+          <div className="px-5 py-4 text-sm">
+            {latestPayslip ? (
+              <>
+                <p className="text-ink-muted">{latestPayslip.period_name}</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">
+                  {formatInr(latestPayslip.net_pay)}
+                </p>
+                <Link
+                  href={`/payslips/${latestPayslip.id}`}
+                  className="mt-3 inline-block font-medium text-brand-700 hover:underline"
+                >
+                  View payslip
+                </Link>
+              </>
+            ) : (
+              <p className="text-ink-subtle">No payslip has been released to you yet.</p>
+            )}
+          </div>
+        </Card>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card aria-labelledby="my-leave-heading">

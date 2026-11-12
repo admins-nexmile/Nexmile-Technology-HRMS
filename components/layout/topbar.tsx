@@ -1,4 +1,4 @@
-import type { HeaderUser, NavContext } from "@/lib/types/hrms";
+﻿import type { HeaderUser, NavContext } from "@/lib/types/hrms";
 import { BrandLogo } from "./brand-logo";
 import { MobileNav } from "./mobile-nav";
 import { SidebarContent } from "./sidebar";
@@ -6,7 +6,7 @@ import { UserMenu } from "./user-menu";
 
 export function Topbar({ user, nav }: { user: HeaderUser; nav: NavContext }) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8 print:hidden">
       <MobileNav>
         <SidebarContent nav={nav} />
       </MobileNav>

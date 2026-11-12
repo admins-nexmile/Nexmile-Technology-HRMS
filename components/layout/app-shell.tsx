@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import type { HeaderUser, NavContext } from "@/lib/types/hrms";
 import { SidebarContent } from "./sidebar";
 import { Topbar } from "./topbar";
@@ -22,11 +22,11 @@ export function AppShell({
         Skip to main content
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 lg:block print:hidden">
         <SidebarContent nav={nav} />
       </aside>
 
-      <div className="flex min-h-dvh flex-col lg:pl-64">
+      <div className="flex min-h-dvh flex-col lg:pl-64 print:pl-0">
         <Topbar user={user} nav={nav} />
         <main
           id="main-content"

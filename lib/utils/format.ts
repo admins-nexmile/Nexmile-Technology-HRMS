@@ -59,3 +59,13 @@ export function daysBetween(fromIso: string, toIso: string): number {
   const ms = parseIsoDate(toIso).getTime() - parseIsoDate(fromIso).getTime();
   return Math.round(ms / 86_400_000);
 }
+
+/** Indian rupee amount, e.g. "₹65,000.00". */
+export function formatInr(value: number): string {
+  return new Intl.NumberFormat(LOCALE, {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
