@@ -1,0 +1,20 @@
+/**
+ * Fixed sign-in error messages. The /login page only ever shows one of
+ * these, looked up by code, so no request text is reflected into the page.
+ */
+export const LOGIN_ERRORS = {
+  domain: "Only Nexmile Technology accounts (@nexmiletechnology.com) can sign in.",
+  unverified: "Your email address could not be verified. Please try again.",
+  oauth: "Google sign-in was cancelled or failed. Please try again.",
+  callback: "We could not complete sign-in. Please try again.",
+} as const;
+
+export type LoginErrorCode = keyof typeof LOGIN_ERRORS;
+
+export function isLoginErrorCode(value: unknown): value is LoginErrorCode {
+  return typeof value === "string" && Object.hasOwn(LOGIN_ERRORS, value);
+}
+
+export function loginErrorPath(code: LoginErrorCode): string {
+  return `/login?error=${code}`;
+}
