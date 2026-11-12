@@ -31,7 +31,12 @@ export type IconName =
   | "arrowUp"
   | "arrowDown"
   | "info"
-  | "lock";
+  | "lock"
+  | "building"
+  | "shield"
+  | "list"
+  | "printer"
+  | "tag";
 
 const paths: Record<IconName, ReactNode> = {
   dashboard: (
@@ -163,6 +168,27 @@ const paths: Record<IconName, ReactNode> = {
     <>
       <rect x="4" y="11" width="16" height="10" rx="2" />
       <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </>
+  ),
+  building: (
+    <>
+      <rect x="4" y="3" width="16" height="18" rx="1.5" />
+      <path d="M9 21v-4h6v4M8 7h2M14 7h2M8 11h2M14 11h2" />
+    </>
+  ),
+  shield: <path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" />,
+  list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
+  printer: (
+    <>
+      <path d="M6 9V3h12v6" />
+      <rect x="3" y="9" width="18" height="8" rx="1.5" />
+      <path d="M6 14h12v7H6z" />
+    </>
+  ),
+  tag: (
+    <>
+      <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9Z" />
+      <path d="M7.5 7.5h.01" />
     </>
   ),
 };

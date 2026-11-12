@@ -35,8 +35,20 @@ export const navigation: NavSection[] = [
     ],
   },
   {
-    title: "Administration",
+    title: "HR administration",
     items: [
+      { label: "Employees", icon: "users", href: "/admin/employees", show: can(PERMISSIONS.employeesManage) },
+      { label: "Departments", icon: "building", href: "/admin/departments", show: can(PERMISSIONS.employeesManage) },
+      { label: "Leave types", icon: "tag", href: "/admin/leave-types", show: can(PERMISSIONS.employeesManage) },
+      { label: "Manage holidays", icon: "sun", href: "/admin/holidays", show: can(PERMISSIONS.employeesManage) },
+      { label: "Manage announcements", icon: "megaphone", href: "/admin/announcements", show: can(PERMISSIONS.employeesManage) },
+      { label: "Manage training", icon: "graduation", href: "/admin/training", show: can(PERMISSIONS.employeesManage) },
+    ],
+  },
+  {
+    title: "Access",
+    items: [
+      { label: "Users and roles", icon: "shield", href: "/admin/users", show: can(PERMISSIONS.usersRead) },
       {
         label: "Invitations",
         icon: "userPlus",
