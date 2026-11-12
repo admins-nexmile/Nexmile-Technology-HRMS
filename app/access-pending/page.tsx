@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { signOut } from "@/app/auth/actions";
+import { AcceptInvitationForm } from "@/components/auth/accept-invitation-form";
 import { AuthCard, AuthCardSkeleton } from "@/components/auth/auth-card";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { loginErrorPath } from "@/lib/auth/errors";
@@ -22,6 +23,8 @@ export default function AccessPendingPage() {
 }
 
 async function PendingDetails() {
+  // Read-only: this page never changes data. Acceptance happens only via
+  // the "Accept invitation" button (POST Server Action).
   const access = await getAccessState();
   if (access.status === "anonymous") redirect("/login");
   if (access.status === "rejected") redirect(loginErrorPath(access.reason));
@@ -34,11 +37,13 @@ async function PendingDetails() {
         <span className="font-medium text-ink">{access.email}</span>.
       </p>
       <p className="mt-3 text-sm text-ink-subtle">
-        Your account has not been granted access to the HRMS yet. An
-        administrator will activate your account and assign your role.
-        Please check back later.
+        Your account does not have access to the HRMS yet. If HR has invited
+        you, accept your invitation below.
       </p>
-      <form action={signOut} className="mt-6">
+
+      <AcceptInvitationForm />
+
+      <form action={signOut} className="mt-3">
         <SubmitButton className="w-full" pendingLabel="Signing out…">
           Sign out
         </SubmitButton>

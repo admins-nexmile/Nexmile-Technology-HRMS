@@ -1,8 +1,11 @@
+import { PERMISSIONS } from "@/lib/auth/permissions";
 import type { NavSection } from "@/lib/types/hrms";
 
 /**
  * Sidebar navigation. Only routes that exist have an href; everything
- * else is shown as "coming soon" and is not a link.
+ * else is shown as "coming soon" and is not a link. Items with
+ * `requiredPermission` are hidden from users without it (the pages
+ * themselves also check the permission on the server).
  */
 export const navigation: NavSection[] = [
   {
@@ -32,6 +35,15 @@ export const navigation: NavSection[] = [
   },
   {
     title: "Administration",
-    items: [{ label: "Settings", icon: "settings", status: "coming-soon" }],
+    items: [
+      {
+        label: "Invitations",
+        icon: "userPlus",
+        href: "/admin/invitations",
+        status: "available",
+        requiredPermission: PERMISSIONS.invitationsManage,
+      },
+      { label: "Settings", icon: "settings", status: "coming-soon" },
+    ],
   },
 ];

@@ -7,11 +7,17 @@ import { SearchBox } from "./search-box";
 import { SidebarContent } from "./sidebar";
 import { UserMenu } from "./user-menu";
 
-export function Topbar({ user }: { user: HeaderUser }) {
+export function Topbar({
+  user,
+  permissions,
+}: {
+  user: HeaderUser;
+  permissions: readonly string[];
+}) {
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
       <MobileNav>
-        <SidebarContent />
+        <SidebarContent permissions={permissions} />
       </MobileNav>
 
       <BrandLogo variant="dark" className="sm:hidden" />

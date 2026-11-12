@@ -9,6 +9,8 @@ export type NavItem = {
   /** Only set for routes that actually exist. */
   href?: string;
   status: "available" | "coming-soon";
+  /** Hidden unless the signed-in user holds this permission. */
+  requiredPermission?: string;
 };
 
 export type NavSection = {

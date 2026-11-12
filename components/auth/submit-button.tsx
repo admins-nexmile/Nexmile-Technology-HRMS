@@ -8,11 +8,13 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 export function SubmitButton({
   children,
   pendingLabel,
+  disabled,
   ...rest
 }: Omit<ButtonProps, "type"> & { children: ReactNode; pendingLabel: string }) {
   const { pending } = useFormStatus();
+  const isDisabled = pending || Boolean(disabled);
   return (
-    <Button type="submit" disabled={pending} aria-disabled={pending} {...rest}>
+    <Button type="submit" {...rest} disabled={isDisabled} aria-disabled={isDisabled}>
       {pending ? pendingLabel : children}
     </Button>
   );

@@ -21,6 +21,18 @@ export function formatDate(
   }).format(parseIsoDate(iso));
 }
 
+/** Formats an ISO timestamp (e.g. from the database) in IST. */
+export function formatDateTime(timestamp: string): string {
+  return new Intl.DateTimeFormat(LOCALE, {
+    timeZone: TIME_ZONE,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
+}
+
 export function formatLongDate(iso: string): string {
   return formatDate(iso, {
     weekday: "long",

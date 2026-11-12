@@ -26,6 +26,7 @@ export async function DashboardAccessGate({ children }: { children: ReactNode })
   return (
     <AppShell
       user={{ name: access.name, email: access.email, role: roleLabel(access) }}
+      permissions={access.permissions}
     >
       {children}
     </AppShell>

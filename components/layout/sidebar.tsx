@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icons";
 import { navigation } from "@/lib/navigation";
+import type { NavSection } from "@/lib/types/hrms";
 import { cn } from "@/lib/utils/cn";
 import { BrandLogo } from "./brand-logo";
 import { navItemBase, navLinkClasses } from "./nav-styles";
@@ -12,7 +13,9 @@ import { SidebarNavLink } from "./sidebar-nav-link";
  * navigation dialog. Server component: only active-link detection runs
  * on the client.
  */
-export function SidebarContent() {
+export function SidebarContent({ permissions }: { permissions: readonly string[] }) {
+  const sections = visibleSections(navigation, permissions);
+
   return (
     <div className="flex h-full flex-col bg-brand-950 text-white">
       <div className="flex h-16 shrink-0 items-center border-b border-white/10 px-5">
@@ -20,7 +23,7 @@ export function SidebarContent() {
       </div>
 
       <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 py-4">
-        {navigation.map((section) => (
+        {sections.map((section) => (
           <div key={section.title} className="mb-5 last:mb-0">
             <h2 className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
               {section.title}
@@ -73,4 +76,19 @@ export function SidebarContent() {
       </div>
     </div>
   );
+}
+
+/** Drops items the user lacks permission for, then any empty sections. */
+function visibleSections(
+  sections: NavSection[],
+  permissions: readonly string[],
+): NavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter(
+        (item) => !item.requiredPermission || permissions.includes(item.requiredPermission),
+      ),
+    }))
+    .filter((section) => section.items.length > 0);
 }
