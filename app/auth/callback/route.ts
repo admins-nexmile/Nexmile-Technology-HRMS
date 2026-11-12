@@ -5,14 +5,21 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * OAuth return URL. Exchanges the one-time code for a session, then
- * enforces the sign-in policy on the server. Disallowed accounts are
- * signed out immediately. There is deliberately no `next` parameter, so
- * this route cannot be used as an open redirect.
+ * decides on the server whether the account may stay signed in:
+ *
+ *   - email not verified            -> sign out, error
+ *   - active user with a role       -> dashboard
+ *   - pending invitation for email  -> /access-pending (Accept button)
+ *   - anything else                 -> sign out, "No invitation found"
+ *
+ * Uninvited users are never left signed in. Any failure also signs out
+ * (fail closed). There is deliberately no `next` parameter, so this
+ * route cannot be used as an open redirect.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const fail = (code: LoginErrorCode) =>
-    NextResponse.redirect(new URL(loginErrorPath(code), request.url));
+  const redirectTo = (path: string) => NextResponse.redirect(new URL(path, request.url));
+  const fail = (code: LoginErrorCode) => redirectTo(loginErrorPath(code));
 
   if (searchParams.has("error")) return fail("oauth");
 
@@ -29,7 +36,17 @@ export async function GET(request: NextRequest) {
     return fail(policy.reason);
   }
 
-  // The dashboard gate sends users without an active profile and role
-  // on to /access-pending.
-  return NextResponse.redirect(new URL("/", request.url));
+  // Server-side, read-only check (migration 2.7). The database reads the
+  // verified email and Google identity itself.
+  const { data: status, error: statusError } = await supabase.rpc("my_invitation_status");
+  if (statusError) {
+    await supabase.auth.signOut();
+    return fail("callback");
+  }
+
+  if (status === "active") return redirectTo("/");
+  if (status === "invited") return redirectTo("/access-pending");
+
+  await supabase.auth.signOut();
+  return fail("no_invitation");
 }

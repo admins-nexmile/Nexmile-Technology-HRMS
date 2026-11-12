@@ -16,7 +16,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <AuthCard title="Sign in to Nexmile HRMS" titleId="login-title">
       <p className="mt-2 text-sm text-ink-subtle">
-        Use your Nexmile Technology Google Workspace account.
+        Sign in with the Google account HR invited.
       </p>
       <Suspense fallback={<AuthCardSkeleton />}>
         <LoginForm searchParams={searchParams} />

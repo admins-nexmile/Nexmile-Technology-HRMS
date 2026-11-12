@@ -58,14 +58,15 @@ async function InvitationsContent() {
       <Card className="xl:col-span-1 self-start">
         <CardHeader
           title="New invitation"
-          description="The employee signs in with Google to accept."
+          description="The employee signs in with the invited Google account to accept."
         />
         <CardBody>
           <CreateInvitationForm employees={employeeOptions} roles={roleOptions} appUrl={appUrl} />
           <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-ink-subtle">
             <Icon name="info" className="mt-0.5 size-3.5 shrink-0" />
-            Ask the employee to sign in at {appUrl} with their company Google
-            account. Invitations expire after 14 days.
+            Ask the employee to sign in at {appUrl} with the Google account HR
+            invited. Invitations expire after 14 days. While the Google app is
+            in Testing mode, also add that account as a Google test user.
           </p>
         </CardBody>
       </Card>

@@ -1,4 +1,5 @@
 import "server-only";
+import { connection } from "next/server";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { checkEmailPolicy, type EmailPolicyResult } from "./email-policy";
@@ -55,6 +56,10 @@ type UserRoleRow = {
  * Must be called inside a <Suspense> boundary (reads cookies).
  */
 export const getAccessState = cache(async (): Promise<AccessState> => {
+  // Session checks are always per request. supabase-js reads the current
+  // time (token expiry), which Cache Components forbids during
+  // prerendering, so explicitly defer to request time first.
+  await connection();
   const supabase = await createClient();
   const {
     data: { user },

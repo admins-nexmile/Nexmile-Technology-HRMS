@@ -2,7 +2,6 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { ALLOWED_EMAIL_DOMAIN } from "@/lib/auth/email-policy";
 import { loginErrorPath } from "@/lib/auth/errors";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,9 +22,8 @@ export async function signInWithGoogle(): Promise<never> {
     options: {
       redirectTo: `${origin}/auth/callback`,
       queryParams: {
-        // UX hint only: Google pre-selects Workspace accounts. The real
-        // domain check happens on the server in /auth/callback.
-        hd: ALLOWED_EMAIL_DOMAIN,
+        // Personal Google accounts are allowed; access is decided by the
+        // invitation check in /auth/callback.
         prompt: "select_account",
       },
     },

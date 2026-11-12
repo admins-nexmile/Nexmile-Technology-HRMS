@@ -1,7 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { hasAllowedDomain } from "@/lib/auth/email-policy";
+import { isValidEmail } from "@/lib/auth/email-policy";
 import { getUserWithPermission } from "@/lib/auth/guards";
 import { PERMISSIONS, invitableRolesFor, isInvitableRole } from "@/lib/auth/permissions";
 import { toUserMessage } from "@/lib/invitations/data";
@@ -34,8 +34,8 @@ export async function createInvitationAction(
   if (!UUID_RE.test(employeeId)) {
     return { ok: false, message: "Select an employee." };
   }
-  if (!hasAllowedDomain(email)) {
-    return { ok: false, message: "The email must be a @nexmiletechnology.com address." };
+  if (!isValidEmail(email)) {
+    return { ok: false, message: "Enter a valid email address." };
   }
   if (!isInvitableRole(role) || !invitableRolesFor(user.roles.map((r) => r.key)).includes(role)) {
     return { ok: false, message: "You are not allowed to invite users with that role." };

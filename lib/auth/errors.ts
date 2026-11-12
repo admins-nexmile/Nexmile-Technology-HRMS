@@ -3,7 +3,8 @@
  * these, looked up by code, so no request text is reflected into the page.
  */
 export const LOGIN_ERRORS = {
-  domain: "Only Nexmile Technology accounts (@nexmiletechnology.com) can sign in.",
+  no_invitation: "No invitation found for this account. Ask HR to invite you.",
+  invitation_expired: "Your invitation has expired. Ask HR to send you a new one.",
   unverified: "Your email address could not be verified. Please try again.",
   oauth: "Google sign-in was cancelled or failed. Please try again.",
   callback: "We could not complete sign-in. Please try again.",

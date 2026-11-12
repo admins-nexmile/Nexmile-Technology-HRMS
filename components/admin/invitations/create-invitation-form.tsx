@@ -69,7 +69,7 @@ export function CreateInvitationForm({
 
       <div>
         <label htmlFor={ids.email} className="text-sm font-medium text-ink">
-          Company email
+          Google account email
         </label>
         <input
           id={ids.email}
@@ -79,7 +79,7 @@ export function CreateInvitationForm({
           disabled={disabled}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@nexmiletechnology.com"
+          placeholder="name@gmail.com"
           className={fieldClass}
         />
         <p className="mt-1 text-xs text-ink-subtle">
@@ -132,8 +132,8 @@ export function CreateInvitationForm({
             {state.ok ? (
               <p className="mt-1">
                 Ask the employee to sign in at{" "}
-                <span className="font-medium">{appUrl}</span> with their company
-                Google account.
+                <span className="font-medium">{appUrl}</span> with the Google
+                account HR invited.
               </p>
             ) : null}
           </div>

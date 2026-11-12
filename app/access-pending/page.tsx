@@ -37,8 +37,8 @@ async function PendingDetails() {
         <span className="font-medium text-ink">{access.email}</span>.
       </p>
       <p className="mt-3 text-sm text-ink-subtle">
-        Your account does not have access to the HRMS yet. If HR has invited
-        you, accept your invitation below.
+        HR has invited this Google account. Accept your invitation to open
+        the HRMS.
       </p>
 
       <AcceptInvitationForm />
